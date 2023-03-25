@@ -104,22 +104,23 @@ def generate_ship(length):
             ship = [(x, y+i) for i in range(length)]
         if is_valid_location(ship):
             return ship
+        
 
 
 
 while len(ships) < 1:
     ship = generate_ship(3)
     ships.append(ship)
-    
-while len(ships) < 2:
+
+while len(ships) < 3:
     ship = generate_ship(2)
     ships.append(ship)
-    
-while len(ships) < 3:
+
+while len(ships) < 7:
     ship = generate_ship(1)
     ships.append(ship)
 
-print(ships)
+
 
 # Вывод сетки на экран
 for x in range(SIZE):
