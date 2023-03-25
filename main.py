@@ -123,12 +123,20 @@ while len(ships) < 7:
 
 
 # Вывод сетки на экран
+for i, f in enumerate(range(SIZE+1)):
+    if i == SIZE:
+        print(f,"|")
+    elif i == 0:
+        print(" ","|",end=" ")
+    else:
+        print(f,"|",end=" ")
 for x in range(SIZE):
+    print(x+1,"|", end=" ")
     for y in range(SIZE):
         if any((x, y) in ship for ship in ships):
-            print("O", end=" ")
+            print("O", "|", end=" ")
         else:
-            print(".", end=" ")
+            print(".", "|", end=" ")
     print()
 
 
