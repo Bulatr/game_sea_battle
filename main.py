@@ -63,6 +63,9 @@ class Field:
         self.__size = size
         self.__min_distance = min_distance
         self.__coordinates = []
+        self.__fields=[]
+        self.gamer = 1
+
 
     # Получение мин дистации
     def get_min_distance(self):
@@ -75,6 +78,26 @@ class Field:
     # Получение поля
     def get_ships(self):
         return self.__ships
+
+    # установка игрока
+    def set_field_gamer(self, gamer):
+        self.gamer = gamer
+
+    # Установка экземпляра поля
+    # Объект в котором содержится данные полей игроков
+    def set_field_items(self, gamer):
+        self.set_field_gamer(gamer)
+        obj = {
+            "gamer": self.gamer,
+            "field": self.__ships
+        }
+        self.__fields.append(
+            obj
+        )
+
+    # Получение экземпляра поля
+    def get_item_fields(self):
+        return self.__fields
 
     # Установка случайным образом координат кораблей
     # * @param size - размер карты в клетках, целое число
@@ -116,8 +139,8 @@ class Field:
         return True
 
     # Установка кораблей на поле
-    def set_ships(self, id_ship, gamer, obj_ship, ships, a = 1, b = 2, c = 3):
-
+    def set_ships(self, gamer, obj_ship, ships, a = 1, b = 2, c = 3):
+        id_ship = 1
         self.__ships = ships
         while len(ships) < 1:
             ship = self.set_ship( self.__size, c, self.__min_distance)
@@ -178,9 +201,9 @@ appField = Field([], 6, 2)
 
 # Установка кораблей
 ship = Ship()
-ship.get_coordinates()
-
-appField.set_ships( 1, 1, ship, [], 1, 2, 3)
+for i in range(2):
+    appField.set_ships( i+1, ship, [], 1, 2, 3)
+    appField.set_field_items(i+1)
 
 # Получение кораблей
 appField.get_ships()
@@ -188,7 +211,9 @@ appField.get_ships()
 # Вывод поля
 appField.get_field()
 
-print(ship.get_ship())
+print("ship.get_ship():", ship.get_ship())
+
+print("appField.get_item_fields():", appField.get_item_fields())
 
 # Отладка кода для размещения кораблей
 
