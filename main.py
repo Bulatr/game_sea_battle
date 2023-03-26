@@ -6,81 +6,198 @@ import random
 
 # Класс Корабля
 class Ship:
-    '''
-    Класс Ship - Корабль
-    Свойства:
-    size - размер корабля
-    coordinates - Координаты корабля (x,y)
-    status - Статус корабля (damaged - поврежден, sank - потоплен)
-    whole_cells - Количество целых клеток
-    id_ship - id корабля (уникальный номер)
-    gamer - сторона игрок или компьютер (user, computer)
-    Методы
-    set_ship - Создание корабля
-    set_hitting_ship - Установка попадания в корабль
-    get_status_ship - Получение статуса корабля, возвращвет damaged - поврежден, sank - потоплен
-    '''
-    def __init__(self, size, coordinates, status, whole_cells, id_ship, gamer) -> None:
-        self._size = size
-        self._coordinates = coordinates
-        self._status = status
-        self._whole_cells = whole_cells
-        self._id_ship = id_ship
-        self._gamer = gamer
+    def __init__(self, lenght = 1, coordinates = []):
+        self.__lenght = lenght # Длина корабля
+        self.coordinates = coordinates # Координаты корабля [(x,y)] или [(x,y),(x1,y1)]
+        self.id = 1
+        self.gamer = 1
+        self.status = "normal"
+        self.__item_ship = []
 
-    # Создание корабля
-    def set_ship(self,coordinates):
-        pass
+    # установка координат
+    def set_ship_coordinates(self, coordinates):
+        self.coordinates = coordinates
 
-    # установка попадания в корабль
-    def set_hitting_ship(self, coordinates):
-        pass
+    # установка длины корабля
+    def set_lenght(self, lenght):
+        self.__lenght = lenght
 
-    # Получение статуса корабля
-    def get_status_ship(self,id_ship):
-        pass
+    # установка id корабля
+    def set_id_ship(self, id_ship):
+        self.id = id_ship
 
-# Класс Field
+    # Установка статуса корабля
+    def set_status_ship(self, status):
+        self.status = status
+
+    # Установка экземпляра корабля
+    def set_ship_item(self):
+        obj_ship = {
+            "id": self.id,
+            "gamer": self.gamer,
+            "status": self.status,
+            "coordinates": self.coordinates
+        }
+        self.__item_ship.append(obj_ship)
+
+    # установка игрока
+    def set_gamer(self, gamer):
+        self.gamer = gamer
+
+    # Получение длины корабля
+    def get_lenght(self):
+        return self.__lenght
+
+    # Получение координат корабля
+    def get_coordinates(self):
+        print(self.coordinates)
+        return self.coordinates
+
+    # Получение экземпляра корабля
+    def get_ship(self):
+        return self.__item_ship
+
 class Field:
-    def __init__(self, grid_size, gamer) -> None:
-        self._grid_size = grid_size
-        self._gamer = gamer
-        self._grid = {
-            "player": self._gamer,
-            "grid":[]
-        }
+    def __init__(self, ships=[], size = 6, min_distance = 2):
+        self.__ships = ships
+        self.__size = size
+        self.__min_distance = min_distance
+        self.__coordinates = []
 
-    # Создание пустого поля
-    def set_grid(self, grid_size, gamer):
-        self._grid_size = grid_size
-        self._gamer = gamer
+    # Получение мин дистации
+    def get_min_distance(self):
+        return self.__min_distance
 
-        grid_size = self._grid_size 
-        grid = []
-        self._grid = {
-            "player": self._gamer,
-            "grid": grid
-        }
-        # Создание пустой сетки
-        for i in range(grid_size):
-            row = []
-            for j in range(grid_size):
-                row.append("0")
-            grid.append(row)
+    # Установка размера поля
+    def set_size(self, size):
+        self.__size = size
 
-        return self._grid
-    
-    # Создание поля игрока
-    def set_grid_player(self, gamer, grid):
-        pass
+    # Получение поля
+    def get_ships(self):
+        return self.__ships
+
+    # Установка случайным образом координат кораблей
+    # * @param size - размер карты в клетках, целое число
+    # * @param lenght - размер корабля в клетках, целое число
+    def set_ship(self, size, length, min_distance):
+        i = 1
+        while True:
+            # Случайный выбор координат
+            orientation = random.choice(['horizontal', 'vertical'])
+            if orientation == 'horizontal':
+                # Установка начальных координат
+                x = random.randint(0, size - length)
+                y = random.randint(0, size - 1)
+                # Добавление по оси х клеток
+                self.__coordinates = [(x+i, y) for i in range(length)]
+            else:
+                # Установка начальных координат
+                x = random.randint(0, size - 1)
+                y = random.randint(0, size - length)
+                # Добавление по оси у клеток
+                self.__coordinates = [(x, y+i) for i in range(length)]
+            # Проверка полученных координат
+            if self.is_valid_location(self.__coordinates, min_distance):
+                # возвращаем координаты корабля на поле [(x,y),(x,y)]
+                return self.__coordinates
+
+    # Проверка расположения кораблей
+    # *@param ship - Координаты корабля [(x,y)]
+    # *@param min_distance - Минимальная дистанция (по умолчанию 2)
+    def is_valid_location(self, ship, min_distance = 2):
+        self.__coordinates = ship
+        for x, y in self.__coordinates:
+            if x < 0 or x >= self.__size or y < 0 or y >= self.__size:
+                return False
+            for other_ship in self.__ships:
+                for other_x, other_y in other_ship:
+                    if abs(x - other_x) < min_distance and abs(y - other_y) < min_distance:
+                        return False
+        return True
+
+    # Установка кораблей на поле
+    def set_ships(self, id_ship, gamer, obj_ship, ships, a = 1, b = 2, c = 3):
+
+        self.__ships = ships
+        while len(ships) < 1:
+            ship = self.set_ship( self.__size, c, self.__min_distance)
+            ships.append(ship)
+            obj_ship.set_id_ship(id_ship)
+            obj_ship.set_gamer(gamer)
+            obj_ship.set_status_ship("normal")
+            obj_ship.set_ship_coordinates(ship)
+            obj_ship.set_ship_item()
+            id_ship = id_ship +1
+
+
+        while len(ships) < 3:
+            ship = self.set_ship( self.__size, b, self.__min_distance)
+            ships.append(ship)
+            obj_ship.set_id_ship(id_ship)
+            obj_ship.set_gamer(gamer)
+            obj_ship.set_status_ship("normal")
+            obj_ship.set_ship_coordinates(ship)
+            obj_ship.set_ship_item()
+            id_ship = id_ship +1
+
+        while len(ships) < 7:
+            ship = self.set_ship( self.__size, a, self.__min_distance)
+            ships.append(ship)
+            obj_ship.set_id_ship(id_ship)
+            obj_ship.set_gamer(gamer)
+            obj_ship.set_status_ship("normal")
+            obj_ship.set_ship_coordinates(ship)
+            obj_ship.set_ship_item()
+            id_ship = id_ship +1
+
+    def get_field(self):
+        ships = self.__ships
+        # Вывод сетки на экран
+        for i, f in enumerate(range(self.__size+1)):
+            if i == self.__size:
+                print(f,"|")
+            elif i == 0:
+                print(" ","|",end=" ")
+            else:
+                print(f,"|",end=" ")
+
+        for x in range(self.__size):
+            print(x+1,"|", end=" ")
+            for y in range(self.__size):
+                if any((x, y) in ship for ship in ships):
+                    print("O", "|", end=" ")
+                else:
+                    print(".", "|", end=" ")
+            print()
+
+        print("ships содержит координаты")
+        print(self.__ships)
+
+# установка поля
+appField = Field([], 6, 2)
+
+# Установка кораблей
+ship = Ship()
+ship.get_coordinates()
+
+appField.set_ships( 1, 1, ship, [], 1, 2, 3)
+
+# Получение кораблей
+appField.get_ships()
+
+# Вывод поля
+appField.get_field()
+
+print(ship.get_ship())
 
 # Отладка кода для размещения кораблей
 
-
+'''
 SIZE = 6
 MIN_DISTANCE = 2
 ships = []
 
+# Проверка расположения кораблей
 def is_valid_location(ship):
     for x, y in ship:
         if x < 0 or x >= SIZE or y < 0 or y >= SIZE:
@@ -91,6 +208,7 @@ def is_valid_location(ship):
                     return False
     return True
 
+# генерируем корабль случайным образом
 def generate_ship(length):
     while True:
         orientation = random.choice(['horizontal', 'vertical'])
@@ -104,7 +222,6 @@ def generate_ship(length):
             ship = [(x, y+i) for i in range(length)]
         if is_valid_location(ship):
             return ship
-        
 
 
 
@@ -130,6 +247,7 @@ for i, f in enumerate(range(SIZE+1)):
         print(" ","|",end=" ")
     else:
         print(f,"|",end=" ")
+
 for x in range(SIZE):
     print(x+1,"|", end=" ")
     for y in range(SIZE):
@@ -139,6 +257,9 @@ for x in range(SIZE):
             print(".", "|", end=" ")
     print()
 
+print("ships содержит координаты")
+print(ships)
 
+'''
 
 
