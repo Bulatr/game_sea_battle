@@ -173,8 +173,15 @@ class Field:
             obj_ship.set_ship_item()
             id_ship = id_ship +1
 
-    def get_field(self):
-        ships = self.__ships
+    # Вывод поля на экран
+    def get_field(self, gamer):
+
+        # из self.fields мне нужно плоучить поля игроков
+        gamer_fields = self.get_item_fields()
+        for gamer_field in gamer_fields:
+            if gamer_field['gamer'] == gamer:
+                ships = gamer_field['field']
+
         # Вывод сетки на экран
         for i, f in enumerate(range(self.__size+1)):
             if i == self.__size:
@@ -193,9 +200,6 @@ class Field:
                     print(".", "|", end=" ")
             print()
 
-        print("ships содержит координаты")
-        print(self.__ships)
-
 # установка поля
 appField = Field([], 6, 2)
 
@@ -209,11 +213,15 @@ for i in range(2):
 appField.get_ships()
 
 # Вывод поля
-appField.get_field()
+print("Поле игрока 1")
+appField.get_field(1)
 
-print("ship.get_ship():", ship.get_ship())
+print("Поле игрока 2")
+appField.get_field(2)
 
-print("appField.get_item_fields():", appField.get_item_fields())
+# print("ship.get_ship():", ship.get_ship())
+
+# print("appField.get_item_fields():", appField.get_item_fields())
 
 # Отладка кода для размещения кораблей
 
