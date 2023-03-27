@@ -197,7 +197,7 @@ class Field:
                 if any((x, y) in ship for ship in ships):
                     print("O", "|", end=" ")
                 else:
-                    print(".", "|", end=" ")
+                    print("-", "|", end=" ")
             print()
 
 # установка поля
@@ -221,7 +221,33 @@ appField.get_field(2)
 
 # print("ship.get_ship():", ship.get_ship())
 
-# print("appField.get_item_fields():", appField.get_item_fields())
+fields_gamers = appField.get_item_fields()
+
+# print("appField.get_item_fields():", appField.get_item_fields()) : [
+# {
+#   'gamer': 1,
+#   'field': [[(3, 3), (3, 4), (3, 5)], [(2, 0), (3, 0)], [(1, 4), (1, 5)], [(0, 0)], [(5, 1)], [(1, 2)], [(5, 3)]]
+# },
+# {
+#   'gamer': 2,
+#   'field': [[(0, 1), (0, 2), (0, 3)], [(3, 2), (4, 2)], [(4, 4), (5, 4)], [(2, 4)], [(5, 0)], [(0, 5)], [(3, 0)]]
+# }
+# ]
+
+# Создаем словарь, который будет хранить информацию о попаданиях и потоплениях кораблей
+# Ключи словаря - это координаты клеток, значения - True для попадания и False для промаха
+# Все это надо засунуть в классы.
+hits = {coord: False for gamer in fields_gamers for ship in gamer['field'] for coord in ship}
+
+# Определяем, какой игрок сейчас ходит (первый или второй)
+current_gamer = 1
+
+# Получаем координаты от пользователя
+
+# Проверяем попадание в игрока 2
+
+# если попал, отмечаем координату символом попал
+
 
 # Отладка кода для размещения кораблей
 
