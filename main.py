@@ -185,21 +185,24 @@ class Field:
     # Запись выстрела в сетку игрока
     def set_shot_grid(self, gamer, coord=(0,0)):
         player_grids = self.player_grid
-
+        gamer_fields = self.get_item_fields()
         # Выбираем сетку игрока, будем туда записывать метки кораблей
-        for gamer_grid in player_grids:
-            if gamer_grid['gamer'] == gamer:
-                grid = gamer_grid['grid']
-                if grid[coord] == "■":
-                    print(grid[coord])
-                    grid[coord] = "X"
-                else:
-                    print(grid[coord])
-                    grid[coord] = "T"
-                print(player_grids)
+        gamer_field = gamer_fields[gamer - 1]
+        ships = gamer_field['field']
+        gamer_grid = player_grids[gamer - 1]
+        grid = gamer_grid['grid']
+        if any( coord in ship for ship in ships):
+            grid[coord] = "X" # Попадание
+        else:
+            grid[coord] = "T" # Промах
+
+    def get_player_grid(self):
+        return self.player_grid
+
 
     # Вывод сетки игрока
     def get_grid_player(self, player):
+        print(f"Карта игрока {player}")
         player_grids = self.player_grid
         # Вывод сетки на экран, выводим вертикальные линии
         for i, f in enumerate(range(self.__size+1)):
@@ -219,106 +222,118 @@ class Field:
                         print(grid[(x,y)],"|",end=" ")
                     print()
 
-    # Запись сетки
-    def set_grids(self, gamer):
+    # Запись сетки, первоначальная установка
+    def set_grids(self):
         # Получаем сетку, сюда будем записывать все выстрелы
-        player_grids = self.player_grid
+        player_grids = self.get_player_grid()
         gamer_fields = self.get_item_fields()
         # Выбираем игрока, и координаты его кораблей
-        for gamer_field in gamer_fields:
-            if gamer_field['gamer'] == gamer:
-                ships = gamer_field['field']
+        gamers = [1,2]
+        for gamer in gamers:
+            gamer_field = gamer_fields[gamer-1]
+            ships = gamer_field['field']
+            # Выбираем сетку игрока, будем туда записывать метки кораблей
+            gamer_grid = player_grids[gamer-1]
+            grid = gamer_grid['grid']
+            # тут мы проходим по всем кординатам
+            for x in range(self.__size):
+                for y in range(self.__size):
+                    if any((x, y) in ship for ship in ships):
+                        grid[(x,y)] = "o"
+                    else:
+                        grid[(x,y)] = "o"
 
-        # Выбираем сетку игрока, будем туда записывать метки кораблей
-        for gamer_grid in player_grids:
-            if gamer_grid['gamer'] == gamer:
-                grid = gamer_grid['grid']
-        # тут мы проходим по всем кординатам
-        for x in range(self.__size):
-            for y in range(self.__size):
-                if any((x, y) in ship for ship in ships):
-                    grid[(x,y)] = "■"
-                else:
-                    grid[(x,y)] = "o"
 
     # получение сетки
     def get_grids(self):
         return self.player_grid
 
-    # Проверка количества клеток кораблей
-    def check_ships_in_grid_gamer(self, player):
+    # Проверка количества клеток кораблей, условие выйгрыша
+    # После каждого хода проверяем количество подбитых клеток
+    def check_ships_in_grid_gamer(self):
         player_grids = self.player_grid
-        cells = 0
+        cells_player_1 = 0
+        cells_player_2 = 0
         for gamer_grid in player_grids:
-            if gamer_grid['gamer'] == player:
-                grid = gamer_grid['grid']
-                # тут мы проходим по всем кординатам
-                for x in range(self.__size):
-                    for y in range(self.__size):
-                        if grid[(x,y)] == "■":
-                            cells += 1
-        if cells == 0:
-            return True
+            grid = gamer_grid['grid']
+            player = gamer_grid["gamer"]
+            # тут мы проходим по всем кординатам
+            for x in range(self.__size):
+                for y in range(self.__size):
+                    if grid[(x,y)] == "X":
+                        if player == 1:
+                            cells_player_1 += 1
+                        else:
+                            cells_player_2 += 1
+
+        # Проверяем количество подбитых клеток
+        if cells_player_1 > cells_player_2 and cells_player_1 == 11:
+            return 2
+        elif cells_player_2 > cells_player_1 and cells_player_2 == 11:
+            return 1
         else:
             return False
 
-
-    # Вывод поля на экран
-    def get_field(self, gamer):
-        # из self.fields мне нужно получить поля игроков
-        gamer_fields = self.get_item_fields()
-        # Выбираем игрока, и координаты его кораблей
-        for gamer_field in gamer_fields:
-            if gamer_field['gamer'] == gamer:
-                ships = gamer_field['field']
-                # попробуем заменить на player_grid где будут указаны все координаты
-                # ships = player_grid['grid']
-
-        # Вывод сетки на экран, выводим вертикальные линии
-        for i, f in enumerate(range(self.__size+1)):
-            if i == self.__size:
-                print(f,"|")
-            elif i == 0:
-                print(" ","|",end=" ")
-            else:
-                print(f,"|",end=" ")
-        # тут мы проходим по всем кординатам, если совпадает, то выводим О
-        for x in range(self.__size):
-            print(x+1,"|", end=" ")
-            for y in range(self.__size):
-                if any((x, y) in ship for ship in ships):
-                    print("O", "|", end=" ")
-                else:
-                    print("-", "|", end=" ")
-            print()
-
     # Функция которая просит ввести координаты
-    def input_coord(self):
-        g = True
-        while g:
-            try:
-                shot_x = int(input("Введите координату x для выстрела: "))
-                if shot_x < 1 or shot_x > self.__size:
+    def input_coord(self, player):
+        gx = True
+        gy = True
+        player_grids = self.player_grid
+        t = True
+        while t:
+            while gx:
+                try:
+                    shot_x = int(input("Введите координату x для выстрела: "))
+                    if shot_x < 1 or shot_x > self.__size:
+                        print(f"Введите корректные значения, от 1 до {self.__size}")
+                        continue
+                    gx = False
+
+                except ValueError:
                     print(f"Введите корректные значения, от 1 до {self.__size}")
                     continue
-                g = False
 
-            except ValueError:
-                print(f"Введите корректные значения, от 1 до {self.__size}")
-                continue
-        g = True
-        while g:
-            try:
-                shot_y = int(input("Введите координату y для выстрела: "))
-                if shot_y < 1 or shot_y > self.__size:
+            while gy:
+                try:
+                    shot_y = int(input("Введите координату y для выстрела: "))
+                    if shot_y < 1 or shot_y > self.__size:
+                        print(f"Введите корректные значения, от 1 до {self.__size}")
+                        continue
+                    gy = False
+
+                except ValueError:
                     print(f"Введите корректные значения, от 1 до {self.__size}")
                     continue
-                g = False
+            # Проверяем координаты на повтор
+            for player_grid in player_grids:
+                # Меняем местами игрока, так как проверяем на сетке оппонента
+                if player_grid["gamer"] == player:
+                    grid = player_grid["grid"]
+                    if grid[(shot_x-1,shot_y-1)] == "X" or grid[(shot_x-1,shot_y-1)] == "T":
+                        print("Вы уже стреляли по этим координатам")
+                        gx = True
+                        gy = True
+                    else:
+                        t = False
+        return (shot_x-1,shot_y-1)
 
-            except ValueError:
-                print(f"Введите корректные значения, от 1 до {self.__size}")
-                continue
-        return (shot_x,shot_y)
+    # Проверка попадания по кораблю
+    def check_shot_ships(self, player, coord):
+        gamer_fields = self.get_item_fields()
+        # Выбираем оппонента
+        if player == 1:
+            player = 2
+        else:
+            player = 1
+        for gamer_field in gamer_fields:
+            if gamer_field['gamer'] == player:
+                ships = gamer_field['field']
+                if any( coord in ship for ship in ships):
+                    print("Попадание")
+                    return True
+                else:
+                    print("Промах")
+                    return False
 
 # установка поля
 appField = Field([], 6, 2)
@@ -331,15 +346,50 @@ for i in range(2):
 
 # Получение кораблей
 appField.get_ships()
+appField.set_grids()
 
-appField.set_grids(1)
-appField.set_grids(2)
-# Определяем, какой игрок сейчас ходит (первый или второй)
+# Определяем, какой игрок сейчас ходит первый
 current_gamer = 1
 
+# Меняем игрока
+def reverse_player(player):
+    if player == 1:
+        return 2
+    else:
+        return 1
+
+# Создаем бесконечный цикл
+check_end_game = True
+
+while check_end_game:
+    print(f"Ходит игрок {current_gamer}")
+    coord = appField.input_coord(reverse_player(current_gamer))
+    appField.set_shot_grid(reverse_player(current_gamer), coord)
+    win = appField.check_ships_in_grid_gamer()
+    if win:
+        print(f"Игрок {win} победил")
+        appField.get_grid_player(reverse_player(current_gamer))
+        print()
+        appField.get_grid_player(current_gamer)
+        break
+    if appField.check_shot_ships(current_gamer, coord):
+        print(f"Игрок {current_gamer} продолжает ход")
+        print()
+        appField.get_grid_player(reverse_player(current_gamer))
+        print()
+        appField.get_grid_player(current_gamer)
+        print()
+    else:
+        print()
+        appField.get_grid_player(reverse_player(current_gamer))
+        print()
+        appField.get_grid_player(current_gamer)
+        current_gamer = reverse_player(current_gamer)
+        print()
+    
 
 
-# print("appField.get_item_fields():", appField.get_item_fields()) : [
+# appField.get_item_fields() : [
 # {
 #   'gamer': 1,
 #   'field': [[(3, 3), (3, 4), (3, 5)], [(2, 0), (3, 0)], [(1, 4), (1, 5)], [(0, 0)], [(5, 1)], [(1, 2)], [(5, 3)]]
@@ -349,96 +399,4 @@ current_gamer = 1
 #   'field': [[(0, 1), (0, 2), (0, 3)], [(3, 2), (4, 2)], [(4, 4), (5, 4)], [(2, 4)], [(5, 0)], [(0, 5)], [(3, 0)]]
 # }
 # ]
-
-
-
-
-# appField.set_shot_grid(current_gamer, (0,2))
-appField.get_grid_player(current_gamer)
-
-# Создаем бесконечный цикл
-check_end_game = True
-coord = appField.input_coord()
-print(coord)
-
-# print(appField.get_grids())
-# Получаем координаты от пользователя
-
-# Проверяем попадание в игрока 2
-
-# если попал, отмечаем координату символом попал
-
-
-# Отладка кода для размещения кораблей
-
-'''
-SIZE = 6
-MIN_DISTANCE = 2
-ships = []
-
-# Проверка расположения кораблей
-def is_valid_location(ship):
-    for x, y in ship:
-        if x < 0 or x >= SIZE or y < 0 or y >= SIZE:
-            return False
-        for other_ship in ships:
-            for other_x, other_y in other_ship:
-                if abs(x - other_x) < MIN_DISTANCE and abs(y - other_y) < MIN_DISTANCE:
-                    return False
-    return True
-
-# генерируем корабль случайным образом
-def generate_ship(length):
-    while True:
-        orientation = random.choice(['horizontal', 'vertical'])
-        if orientation == 'horizontal':
-            x = random.randint(0, SIZE - length)
-            y = random.randint(0, SIZE - 1)
-            ship = [(x+i, y) for i in range(length)]
-        else:
-            x = random.randint(0, SIZE - 1)
-            y = random.randint(0, SIZE - length)
-            ship = [(x, y+i) for i in range(length)]
-        if is_valid_location(ship):
-            return ship
-
-
-
-while len(ships) < 1:
-    ship = generate_ship(3)
-    ships.append(ship)
-
-while len(ships) < 3:
-    ship = generate_ship(2)
-    ships.append(ship)
-
-while len(ships) < 7:
-    ship = generate_ship(1)
-    ships.append(ship)
-
-
-
-# Вывод сетки на экран
-for i, f in enumerate(range(SIZE+1)):
-    if i == SIZE:
-        print(f,"|")
-    elif i == 0:
-        print(" ","|",end=" ")
-    else:
-        print(f,"|",end=" ")
-
-for x in range(SIZE):
-    print(x+1,"|", end=" ")
-    for y in range(SIZE):
-        if any((x, y) in ship for ship in ships):
-            print("O", "|", end=" ")
-        else:
-            print(".", "|", end=" ")
-    print()
-
-print("ships содержит координаты")
-print(ships)
-
-'''
-
 
