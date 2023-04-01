@@ -65,6 +65,7 @@ class Field:
         self.__coordinates = []
         self.__fields=[]
         self.gamer = 1
+        self.player_grid = []
 
 
     # Получение мин дистации
@@ -89,10 +90,18 @@ class Field:
         self.set_field_gamer(gamer)
         obj = {
             "gamer": self.gamer,
-            "field": self.__ships
+            "field": self.__ships # Добавляем координаты кораблей
+        }
+        # Создаем пустую сетку игроков
+        grid = {
+            "gamer": self.gamer,
+            "grid": {}  # Пример содержимого 'grid': {(0, 0): 'o', (0, 1): 'o', (0, 2): 'o'}
         }
         self.__fields.append(
             obj
+        )
+        self.player_grid.append(
+            grid
         )
 
     # Получение экземпляра поля
@@ -173,16 +182,62 @@ class Field:
             obj_ship.set_ship_item()
             id_ship = id_ship +1
 
-    # Вывод поля на экран
-    def get_field(self, gamer):
+    # Запись выстрела в сетку игрока
+    def set_shot_grid(self, gamer, coord=(0,0)):
+        player_grids = self.player_grid
 
-        # из self.fields мне нужно плоучить поля игроков
+        # Выбираем сетку игрока, будем туда записывать метки кораблей
+        for gamer_grid in player_grids:
+            if gamer_grid['gamer'] == gamer:
+                grid = gamer_grid['grid']
+                if grid[coord] == "■":
+                    print(grid[coord])
+                    grid[coord] = "X"
+                else:
+                    print(grid[coord])
+                    grid[coord] = "T"
+                print(player_grids)
+
+
+
+    # Запись сетки
+    def set_grids(self, gamer):
+        # Получаем сетку, сюда будем записывать все выстрелы
+        player_grids = self.player_grid
         gamer_fields = self.get_item_fields()
+        # Выбираем игрока, и координаты его кораблей
         for gamer_field in gamer_fields:
             if gamer_field['gamer'] == gamer:
                 ships = gamer_field['field']
 
-        # Вывод сетки на экран
+        # Выбираем сетку игрока, будем туда записывать метки кораблей
+        for gamer_grid in player_grids:
+            if gamer_grid['gamer'] == gamer:
+                grid = gamer_grid['grid']
+        # тут мы проходим по всем кординатам
+        for x in range(self.__size):
+            for y in range(self.__size):
+                if any((x, y) in ship for ship in ships):
+                    grid[(x,y)] = "■"
+                else:
+                    grid[(x,y)] = "o"
+
+    # получение сетки
+    def get_grids(self):
+        return self.player_grid
+
+    # Вывод поля на экран
+    def get_field(self, gamer):
+        # из self.fields мне нужно получить поля игроков
+        gamer_fields = self.get_item_fields()
+        # Выбираем игрока, и координаты его кораблей
+        for gamer_field in gamer_fields:
+            if gamer_field['gamer'] == gamer:
+                ships = gamer_field['field']
+                # попробуем заменить на player_grid где будут указаны все координаты
+                # ships = player_grid['grid']
+
+        # Вывод сетки на экран, выводим вертикальные линии
         for i, f in enumerate(range(self.__size+1)):
             if i == self.__size:
                 print(f,"|")
@@ -190,7 +245,7 @@ class Field:
                 print(" ","|",end=" ")
             else:
                 print(f,"|",end=" ")
-
+        # тут мы проходим по всем кординатам, если совпадает, то выводим О
         for x in range(self.__size):
             print(x+1,"|", end=" ")
             for y in range(self.__size):
@@ -219,9 +274,13 @@ appField.get_field(1)
 print("Поле игрока 2")
 appField.get_field(2)
 
+appField.set_grids(1)
+appField.set_grids(2)
+
+
 # print("ship.get_ship():", ship.get_ship())
 
-fields_gamers = appField.get_item_fields()
+# fields_gamers = appField.get_item_fields()
 
 # print("appField.get_item_fields():", appField.get_item_fields()) : [
 # {
@@ -237,11 +296,12 @@ fields_gamers = appField.get_item_fields()
 # Создаем словарь, который будет хранить информацию о попаданиях и потоплениях кораблей
 # Ключи словаря - это координаты клеток, значения - True для попадания и False для промаха
 # Все это надо засунуть в классы.
-hits = {coord: False for gamer in fields_gamers for ship in gamer['field'] for coord in ship}
+# hits = {coord: False for gamer in fields_gamers for ship in gamer['field'] for coord in ship}
 
 # Определяем, какой игрок сейчас ходит (первый или второй)
 current_gamer = 1
-
+appField.set_shot_grid(current_gamer, (0,2))
+# print(appField.get_grids())
 # Получаем координаты от пользователя
 
 # Проверяем попадание в игрока 2
