@@ -198,7 +198,26 @@ class Field:
                     grid[coord] = "T"
                 print(player_grids)
 
+    # Вывод сетки игрока
+    def get_grid_player(self, player):
+        player_grids = self.player_grid
+        # Вывод сетки на экран, выводим вертикальные линии
+        for i, f in enumerate(range(self.__size+1)):
+            if i == self.__size:
+                print(f,"|")
+            elif i == 0:
+                print(" ","|",end=" ")
+            else:
+                print(f,"|",end=" ")
 
+        for gamer_grid in player_grids:
+            if gamer_grid['gamer'] == player:
+                grid = gamer_grid['grid']
+                for x in range(self.__size):
+                    print(x+1,"|", end=" ")
+                    for y in range(self.__size):
+                        print(grid[(x,y)],"|",end=" ")
+                    print()
 
     # Запись сетки
     def set_grids(self, gamer):
@@ -225,6 +244,24 @@ class Field:
     # получение сетки
     def get_grids(self):
         return self.player_grid
+
+    # Проверка количества клеток кораблей
+    def check_ships_in_grid_gamer(self, player):
+        player_grids = self.player_grid
+        cells = 0
+        for gamer_grid in player_grids:
+            if gamer_grid['gamer'] == player:
+                grid = gamer_grid['grid']
+                # тут мы проходим по всем кординатам
+                for x in range(self.__size):
+                    for y in range(self.__size):
+                        if grid[(x,y)] == "■":
+                            cells += 1
+        if cells == 0:
+            return True
+        else:
+            return False
+
 
     # Вывод поля на экран
     def get_field(self, gamer):
@@ -255,6 +292,34 @@ class Field:
                     print("-", "|", end=" ")
             print()
 
+    # Функция которая просит ввести координаты
+    def input_coord(self):
+        g = True
+        while g:
+            try:
+                shot_x = int(input("Введите координату x для выстрела: "))
+                if shot_x < 1 or shot_x > self.__size:
+                    print(f"Введите корректные значения, от 1 до {self.__size}")
+                    continue
+                g = False
+
+            except ValueError:
+                print(f"Введите корректные значения, от 1 до {self.__size}")
+                continue
+        g = True
+        while g:
+            try:
+                shot_y = int(input("Введите координату y для выстрела: "))
+                if shot_y < 1 or shot_y > self.__size:
+                    print(f"Введите корректные значения, от 1 до {self.__size}")
+                    continue
+                g = False
+
+            except ValueError:
+                print(f"Введите корректные значения, от 1 до {self.__size}")
+                continue
+        return (shot_x,shot_y)
+
 # установка поля
 appField = Field([], 6, 2)
 
@@ -267,20 +332,12 @@ for i in range(2):
 # Получение кораблей
 appField.get_ships()
 
-# Вывод поля
-print("Поле игрока 1")
-appField.get_field(1)
-
-print("Поле игрока 2")
-appField.get_field(2)
-
 appField.set_grids(1)
 appField.set_grids(2)
+# Определяем, какой игрок сейчас ходит (первый или второй)
+current_gamer = 1
 
 
-# print("ship.get_ship():", ship.get_ship())
-
-# fields_gamers = appField.get_item_fields()
 
 # print("appField.get_item_fields():", appField.get_item_fields()) : [
 # {
@@ -293,14 +350,17 @@ appField.set_grids(2)
 # }
 # ]
 
-# Создаем словарь, который будет хранить информацию о попаданиях и потоплениях кораблей
-# Ключи словаря - это координаты клеток, значения - True для попадания и False для промаха
-# Все это надо засунуть в классы.
-# hits = {coord: False for gamer in fields_gamers for ship in gamer['field'] for coord in ship}
 
-# Определяем, какой игрок сейчас ходит (первый или второй)
-current_gamer = 1
-appField.set_shot_grid(current_gamer, (0,2))
+
+
+# appField.set_shot_grid(current_gamer, (0,2))
+appField.get_grid_player(current_gamer)
+
+# Создаем бесконечный цикл
+check_end_game = True
+coord = appField.input_coord()
+print(coord)
+
 # print(appField.get_grids())
 # Получаем координаты от пользователя
 
